@@ -181,6 +181,19 @@ message DeletePersistentCacheTaskRequest {
   string task_id = 1;
 }
 
+message SyncParentStatusRequest {
+  // Host id.
+  string host_id = 1;
+  // Peer id.
+  string peer_id = 2;
+}
+
+message SyncParentStatusResponse {
+  // State
+  uint64 state = 1; // 值越大表示状态越好
+}
+
+
 // DfdaemonUpload represents upload service of dfdaemon.
 service DfdaemonUpload{
   // DownloadTask downloads task from p2p network.
@@ -206,6 +219,9 @@ service DfdaemonUpload{
 
   // DeletePersistentCacheTask deletes persistent cache task from p2p network.
   rpc DeletePersistentCacheTask(DeletePersistentCacheTaskRequest) returns(google.protobuf.Empty);
+
+  // SyncParentState sync parents state (network).
+  rpc SyncParentStatus(SyncParentStatusRequest) returns (SyncParentStatusResponse);
 }
 
 // DfdaemonDownload represents download service of dfdaemon.

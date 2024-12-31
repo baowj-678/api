@@ -251,6 +251,27 @@ pub struct DeletePersistentCacheTaskRequest {
     #[prost(string, tag = "1")]
     pub task_id: ::prost::alloc::string::String,
 }
+#[derive(serde::Serialize, serde::Deserialize)]
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct SyncParentStatusRequest {
+    /// Host id.
+    #[prost(string, tag = "1")]
+    pub host_id: ::prost::alloc::string::String,
+    /// Peer id.
+    #[prost(string, tag = "2")]
+    pub peer_id: ::prost::alloc::string::String,
+}
+#[derive(serde::Serialize, serde::Deserialize)]
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct SyncParentStatusResponse {
+    /// State
+    ///
+    /// 值越大表示状态越好
+    #[prost(uint64, tag = "1")]
+    pub state: u64,
+}
 /// Generated client implementations.
 pub mod dfdaemon_upload_client {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
@@ -553,6 +574,34 @@ pub mod dfdaemon_upload_client {
                         "dfdaemon.v2.DfdaemonUpload",
                         "DeletePersistentCacheTask",
                     ),
+                );
+            self.inner.unary(req, path, codec).await
+        }
+        /// SyncParentState sync parents state (network).
+        pub async fn sync_parent_status(
+            &mut self,
+            request: impl tonic::IntoRequest<super::SyncParentStatusRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::SyncParentStatusResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/dfdaemon.v2.DfdaemonUpload/SyncParentStatus",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new("dfdaemon.v2.DfdaemonUpload", "SyncParentStatus"),
                 );
             self.inner.unary(req, path, codec).await
         }
@@ -950,6 +999,14 @@ pub mod dfdaemon_upload_server {
             &self,
             request: tonic::Request<super::DeletePersistentCacheTaskRequest>,
         ) -> std::result::Result<tonic::Response<()>, tonic::Status>;
+        /// SyncParentState sync parents state (network).
+        async fn sync_parent_status(
+            &self,
+            request: tonic::Request<super::SyncParentStatusRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::SyncParentStatusResponse>,
+            tonic::Status,
+        >;
     }
     /// DfdaemonUpload represents upload service of dfdaemon.
     #[derive(Debug)]
@@ -1396,6 +1453,52 @@ pub mod dfdaemon_upload_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = DeletePersistentCacheTaskSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/dfdaemon.v2.DfdaemonUpload/SyncParentStatus" => {
+                    #[allow(non_camel_case_types)]
+                    struct SyncParentStatusSvc<T: DfdaemonUpload>(pub Arc<T>);
+                    impl<
+                        T: DfdaemonUpload,
+                    > tonic::server::UnaryService<super::SyncParentStatusRequest>
+                    for SyncParentStatusSvc<T> {
+                        type Response = super::SyncParentStatusResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::SyncParentStatusRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as DfdaemonUpload>::sync_parent_status(&inner, request)
+                                    .await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = SyncParentStatusSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
